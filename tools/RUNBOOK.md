@@ -1,11 +1,11 @@
-# Daily publish runbook (Mon-Fri 10:00 Vancouver)
+# Daily publish runbook (Mon-Fri 9:39 Vancouver)
 
 Source of truth: the Claude dashboard https://claude.ai/artifact/TaNmEVUHF97VSVghtB27SU ("Predictive Revenue Model").
 This repo holds the locked copy (`index.html`) and an encrypted kit (`kit.tar.gz.enc`) of every input the last build used,
 so each run only downloads what changed. Never commit an unencrypted file with data in it.
 
 1. Attach and clone `jd-ecomm/jd-revenue-model` with push access.
-2. Team password: ArtifactData `get` on the dashboard, collection `config`, doc `github_site`, field `password`. Export it as `PRM_PW` for the shell only; never print it, write it to a file in the repo, or put it in a commit message.
+2. Team password: Projects `project_read` of `claude/prm-site-password.md` in the "JD Sports" project (first non-empty line). Export it as `PRM_PW` for the shell only; never print it, write it to a file in the repo, or put it in a commit message. If the doc is missing, stop. To change the password, Ryan edits that doc; the next run re-locks the site with it.
 3. Unpack the kit: `mkdir -p /tmp/kit && openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:PRM_PW -in kit.tar.gz.enc | tar -xz -C /tmp/kit`.
 4. Sync the kit with the dashboard:
    - ArtifactData `list` collection `datasets` (limit 200) with `out_dir` /tmp/sync. Replace /tmp/kit/datasets with those JSON files.
