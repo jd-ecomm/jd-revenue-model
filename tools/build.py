@@ -16,6 +16,12 @@ for f in glob.glob(K + '/datasets/*.json'):
         data[n] = json.load(open(f'{K}/lt/{n}.json'))
 through = max(r['date'] for r in data['lt_sales'])
 page = open(K + '/index.html', encoding='utf-8').read()
+# a <script src="x.js"> naming another file of the dashboard (files/<name>) is inlined from kit/files/<name>
+def inline(m):
+    f = f"{K}/files/{m.group(1)}"
+    if not os.path.exists(f): sys.exit(f'missing page file {m.group(1)}: fetch files/{m.group(1)} into {K}/files/')
+    return '<script>' + open(f, encoding='utf-8').read() + '</script>'
+page = re.sub(r'<script src="([A-Za-z0-9_.-]+\.js)"></script>', inline, page)
 def font(m):
     p = glob.glob(f"{K}/blobs/{m.group(1)}.*")[0]
     return "url(data:font/woff2;base64," + base64.b64encode(open(p, 'rb').read()).decode() + ")"

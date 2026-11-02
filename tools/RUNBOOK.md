@@ -9,7 +9,7 @@ never committed: each run rebuilds the kit from scratch in /tmp/kit.
 3. Sync the kit with the dashboard:
    - ArtifactData `list` collection `datasets` (limit 200) with `out_dir` /tmp/sync. Copy those JSON files into /tmp/kit/datasets.
    - For every dataset whose `source.kind` is `file`, take the id from `source.url` (`/_blob/<id>`) and fetch it with Artifact `read`, `path` = <id>, `out_dir` = /tmp/kit/blobs (one id per call). Also fetch the three fonts (872f8638673a9b30a10eb06bf31f09f2, fdebddcbf42081ff9e6cbbf305b30e2a, ba54dc9ca7f335658e80aef52c24520d).
-   - ArtifactData `get` collection `files`, doc `index.html`; write its `text` field to /tmp/kit/index.html. If the page references another `/_blob/<id>`, fetch it the same way.
+   - ArtifactData `get` collection `files`, doc `index.html`; write its `text` field to /tmp/kit/index.html. The page loads its calculations from another page file (`<script src="calcs.js">`): for every `<script src="NAME">` in it, ArtifactData `get` collection `files`, doc `NAME`, and write its `text` field to /tmp/kit/files/NAME. build.py inlines them and stops if one is missing. If the page references another `/_blob/<id>`, fetch it the same way.
    - Lifetimely `get-metric-time-series`, timeframe day, dateFrom 2026-09-13, dateTo yesterday (Vancouver), for `product_revenue`, `total_discounts`, `refunds`. Write each `values` list as [{"date","value" (number)}] to /tmp/kit/lt/lt_sales.json, lt_discounts.json, lt_refunds.json respectively.
 4. From the repo root: `tools/publish.sh /tmp/kit`. The build must print "data through <yesterday>"; if not, stop and report.
 5. Commit `index.html` ("Daily refresh YYYY-MM-DD") and push to `main`. Never commit anything from /tmp/kit.
