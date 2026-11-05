@@ -1,4 +1,6 @@
-# Daily publish runbook (Mon-Fri, Vancouver)
+# Daily publish runbook (Mon-Fri 9:15am Vancouver)
+
+Run as step 5 of the single scheduled task "PRM daily refresh + site publish", only after the dashboard refresh succeeded. There is no separate publish task.
 
 Source of truth: the Claude dashboard https://claude.ai/artifact/TaNmEVUHF97VSVghtB27SU ("Predictive Revenue Model").
 This repo holds the published copy (`index.html`). The site is not password-locked. Raw inputs (the kit) are
@@ -7,7 +9,7 @@ never committed: each run rebuilds the kit from scratch in /tmp/kit.
 1. Attach and clone `jd-ecomm/jd-revenue-model` with push access.
 2. Start an empty kit: `rm -rf /tmp/kit && mkdir -p /tmp/kit/datasets /tmp/kit/blobs /tmp/kit/lt`.
 3. Sync the kit with the dashboard:
-   - ArtifactData `list` collection `datasets` (limit 200) with `out_dir` /tmp/sync. Copy those JSON files into /tmp/kit/datasets.
+   - ArtifactData `list` collection `datasets` (limit 200), without `out_dir` (refused for this artifact). Write each document's `data` object to /tmp/kit/datasets/<id>.json (so `source` is at the top level).
    - For every dataset whose `source.kind` is `file`, take the id from `source.url` (`/_blob/<id>`) and fetch it with Artifact `read`, `path` = <id>, `out_dir` = /tmp/kit/blobs (one id per call). Also fetch the three fonts (872f8638673a9b30a10eb06bf31f09f2, fdebddcbf42081ff9e6cbbf305b30e2a, ba54dc9ca7f335658e80aef52c24520d).
    - ArtifactData `get` collection `files`, doc `index.html`; write its `text` field to /tmp/kit/index.html. The page loads its calculations from another page file (`<script src="calcs.js">`): for every `<script src="NAME">` in it, ArtifactData `get` collection `files`, doc `NAME`, and write its `text` field to /tmp/kit/files/NAME. build.py inlines them and stops if one is missing. If the page references another `/_blob/<id>`, fetch it the same way.
    - Lifetimely `get-metric-time-series`, timeframe day, dateFrom 2026-09-13, dateTo yesterday (Vancouver), for `product_revenue`, `total_discounts`, `refunds`. Write each `values` list as [{"date","value" (number)}] to /tmp/kit/lt/lt_sales.json, lt_discounts.json, lt_refunds.json respectively.
