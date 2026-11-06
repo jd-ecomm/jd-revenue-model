@@ -1,4 +1,17 @@
-# Daily publish runbook (Mon-Fri 9:15am Vancouver)
+# Daily publish runbook (cloud task "PRM site publish (cloud)", Mon-Fri 9:40am Vancouver)
+
+The refresh task (work PC, 9:15) updates the Claude dashboard but cannot push to GitHub: device-bound sessions have no repo access. Since 6 Nov 2026 a separate CLOUD task publishes the site at 9:40 by patching only what changed:
+
+1. add_repo jd-ecomm/jd-revenue-model (push); clone depth 1.
+2. ArtifactData `list` collection `datasets` (limit 200, NO out_dir) on https://claude.ai/artifact/TaNmEVUHF97VSVghtB27SU. Write the documents as a JSON list of {"id","data"} to /tmp/pw/datasets.json.
+3. Gate: the refresh must have run today. If no dataset has `data.updated.at` on today's Vancouver date, wait 10 minutes and re-list (up to 3 times); then stop and report "refresh hasn't run".
+4. For each `file` dataset whose blob id (from `source.url`) differs from tools/blob_manifest.json, Artifact `read` with `path` = <blob id>, `out_dir` = /tmp/pw/blobs (ONE id per call; `paths` with several ids fails).
+5. Lifetimely get-metric-time-series, timeframe day, dateFrom 2026-09-13, dateTo yesterday: product_revenue, total_discounts, refunds -> /tmp/pw/lt/lt_sales.json, lt_discounts.json, lt_refunds.json as [{"date","value" (number)}].
+6. `python3 tools/patch_site.py /tmp/pw` must print "data through <yesterday>". Commit index.html + tools/blob_manifest.json as "Daily refresh YYYY-MM-DD (booked to <last booked JESTA day>)", push to main, confirm with git log origin/main -1.
+
+If the dashboard's PAGE changed (files/index.html or calcs.js edited), patching keeps the old page: do a full rebuild with the steps below instead.
+
+## Full rebuild (page changes only)
 
 Run as step 5 of the single scheduled task "PRM daily refresh + site publish", only after the dashboard refresh succeeded. There is no separate publish task.
 
