@@ -31,3 +31,12 @@ never committed: each run rebuilds the kit from scratch in /tmp/kit.
 6. Report one line: data through date, files that changed, and the site URL https://jd-ecomm.github.io/jd-revenue-model/.
 
 Stop without pushing if any download fails or the build errors. A stale but correct site beats a broken one.
+
+## Shopify steps in the cloud (added 13 Nov 2026)
+`tools/prm_shopify.py` runs PRM runbook steps 2b (channel files), the Shopify part of 2c (peak_days act_net, act_chk,
+act_sessions) and the Shopify part of 3b (shopify_weekly row, gap_weekly shopify_net) through the Shopify connector,
+no browser. `tools/build_channels.py <last day> <out>` rebuilds channel_months (copy of the script in
+claude/prm-channel-model.md). Tested 13 Nov on 5 to 11 Nov: every sales, order and checkout figure matched the
+browser files; sessions run a few higher on the latest two days (Shopify still counting), which the 7-day refresh
+absorbs. Run by the cloud task "PRM Shopify steps (cloud)" at 8:55 on weekdays, before the 9:15 work-PC refresh.
+
